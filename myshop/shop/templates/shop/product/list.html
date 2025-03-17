@@ -1,0 +1,117 @@
+{% extends "shop/base.html" %}
+{% load static %}
+
+{% block title %}
+    {% if category %}{{ category.name }}{% else %}Productos{% endif %}
+{% endblock %}
+{% block content %}
+
+<div class="pt-16 px-4">
+  <div class="flex items-center w-full max-w-3xl border-1 border-principal rounded-full overflow-hidden">
+      <input type="text" id="searchBox" class="w-full py-1 px-4 text-xl rounded-full outline-none" placeholder="Buscar...">
+      <button type="submit" class="p-2 px-4 bg-principal text-white ">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+              <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+          </svg>
+      </button>
+  </div>
+</div>
+<div class="px-4 mt-7 text-lg w-full">
+  <p class="cursor-pointer flex items-center gap-2" id="toggleCategorias">
+    Categorías 
+    <svg id="arrowDown" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6 text-principal transition-transform duration-300">
+      <path stroke-linecap="round" stroke-linejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
+    </svg>
+  </p>
+
+  <div id="categorias" class="hidden">
+    <div class="rounded-xl columns-2 p-6">
+      <ul class="text-principal underline">
+        <li {% if not category %}class="font-bold"{% endif %}>
+          <a href="{% url 'shop:product_list' %}">Todos</a>
+        </li>
+        {% for c in categories %}
+        <li {% if category.slug == c.slug %}class="font-bold"{% endif %}>
+          <a href="{{ c.get_absolute_url }}">{{ c.name }}</a>
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
+    <hr class="text-zinc-400 border">
+  </div>
+</div>
+ <main id="main"class="pt-2 px-4 pb-30">
+   <h1>{% if category %}{{ category.name }}{% endif %}</h1>
+   <div class="max-w-4xl mx-auto">
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6" id="productContainer">
+   {% for product in products %}
+      <div class="bg-white text-black p-4 rounded-2xl flex flex-col justify-between shadow-lg">
+        
+        <img 
+        src="{% if product.image %}{{ product.image.url }}{% else %}{% static "img/no_image.png" %}{% endif %}"
+        alt="Producto" class="h-48 w-full object-cover rounded-lg mb-4">
+        <h3 class="text-xl font-bold mb-2">{{ product.name }}</h3>
+        <p class="text-2xl">${{ product.price }} <span class="text-xs -ml-1">{%if product.prefix %}{{product.prefix}}{%endif%}</span></p>
+        <p class="mb-4">{{product.description}}</p>
+        <a class="mt-auto border border-principal bg-principal rounded-lg py-2 px-4 text-white transition text-center" href="{{ product.get_absolute_url }}">Agregar al pedido</a>
+      </div>
+   {% endfor %}
+      </div>
+    </div>
+  </main>
+  <div class="rounded-t-xl w-full fixed bottom-0 border-2 bg-white border-principal p-5 shadow-principal">
+    <div class="flex gap-3 justify-between items-center">
+      {% with total_items=cart|length %}
+        
+          {% if total_items > 0 %}
+          <div>
+            <p>{{ total_items }} producto{{ total_items|pluralize }}</p>
+            <p class="text-lg text-principal font-bold">${{ cart.get_total_price | floatformat:2}}</p>
+          </div>
+            <div>
+              <a class="mt-auto border border-principal bg-principal rounded-lg py-2 px-4 text-white transition text-center" href="{% url "cart:cart_detail" %}">Finalizar pedido</a>
+          </div>
+          
+          {% elif not order %}
+          <p>Tu pedido esta vacío</p>
+          {% endif %}
+        
+        
+    </div>
+    {% endwith %}
+    </div>
+  </div>
+<script src="{% static "js/category_toggle.js" %}"></script>
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+      const searchBox = document.getElementById("searchBox");
+      const productContainer = document.getElementById("productContainer");
+  
+      searchBox.addEventListener("keyup", function() {
+          let query = searchBox.value;
+  
+          fetch(`?q=${query}`, {
+              headers: {
+                  "X-Requested-With": "XMLHttpRequest"
+              }
+          })
+          .then(response => response.json())
+          .then(data => {
+              productContainer.innerHTML = "";
+              data.products.forEach(product => {
+                  let productHTML = `
+                      <div class="bg-white text-black p-4 rounded-2xl flex flex-col justify-between shadow-lg product-card">
+                          <img src="${product.image ? product.image : '/static/img/no_image.png'}" alt="Producto" class="h-48 w-full object-cover rounded-lg mb-4">
+                          <h3 class="text-xl font-bold mb-2">${product.name}</h3>
+                          <p class="text-2xl">$${product.price} <span class="text-xs -ml-1">${product.prefix? product.prefix:''}</span></p>
+                          <p class="mb-4">${product.description}</p>
+                          <a class="mt-auto border border-principal bg-principal rounded-lg py-2 px-4 text-white transition text-center" href="${product.url}">Agregar al pedido</a>
+                      </div>
+                  `;
+                  productContainer.innerHTML += productHTML;
+              });
+          });
+      });
+  });
+  </script>
+{% endblock %}

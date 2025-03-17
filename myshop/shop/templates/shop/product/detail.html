@@ -1,0 +1,105 @@
+{% extends "shop/base.html" %}
+ {% load static %}
+ {% block title %}
+  {{ product.name }}
+ {% endblock %}
+ {% block content %}
+
+ 
+  <main class="pt-16 px-4 pb-30 ">
+    <div class="w-full pb-4">
+        <a href="javascript:history.back();">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
+              </svg>
+              
+        </a>
+    </div>
+    <div class="text-center">
+        <img src="{% if product.image %}{{ product.image.url }}{% else %}
+        {% static "img/no_image.png" %}{% endif %}" alt="{{product.name}}" class="h-72 w-full object-cover rounded-lg mb-4">
+    </div>
+    <h1 class="text-xl font-medium">{{ product.name }}</h1>
+    <p class="text-xl font-light">${{ product.price }}<span class="text-xs ">{%if product.prefix %}{{product.prefix}}{%endif%}</span></p>
+    {% comment %} <form action="{% url "cart:cart_add" product.id %}" method="post">
+        <div class="space-y-7">
+            <fieldset>
+              {{ cart_product_form }}
+            </fieldset>
+            {% csrf_token %}
+            <input type="submit" value="Agregar" class="mt-auto border border-principal bg-principal rounded-lg py-2 px-4 text-white transition text-center w-full">
+        </div>
+        <div class="flex items-center justify-center mt-4.5 gap-4">
+                        <button class="size-10 font-bold rounded-full bg-principal flex items-center justify-center text-2xl text-white">
+                            <span class="sr-only">Less</span>
+                            -
+                        </button>
+                        <input id="cantidad" type="number" step="0.25" min="1" value="1" class="border-transparent border-b-principal border-2 font-light text-2xl w-20 text-center [&::-webkit-inner-spin-button]:appearance-none ">
+                        <button class="size-10 font-bold rounded-full bg-principal flex items-center justify-center text-2xl text-white">
+                            <span class="sr-only">Add</span>
+                            +
+                        </button>
+        </div>
+    </form> {% endcomment %}
+    <form  class="add-to-cart-form" action="{% url "cart:cart_add" product.id %}" method="post">
+      {% csrf_token %}
+      <div class="flex items-center justify-center mt-3 gap-4">
+          <button type="button" id="btn-decrease" class=" size-10 font-bold rounded-full bg-principal flex items-center justify-center text-2xl text-white">
+            <span class="sr-only">Less</span>
+            -
+        </button>
+          {{ cart_product_form.quantity }}
+          <button type="button" id="btn-increase" class=" size-10 font-bold rounded-full bg-principal flex items-center justify-center text-2xl text-white">
+            <span class="sr-only">Add</span>
+            +
+        </button>
+      </div>
+      {{ form.override }}
+      <input type="submit" value="Agregar" class="mt-4 border border-principal bg-principal rounded-lg py-2 px-4 text-white transition text-center w-full">
+  </form>
+  
+  <script>
+  document.addEventListener("DOMContentLoaded", function () {
+      document.querySelectorAll(".add-to-cart-form").forEach(form => {
+          const decrementButton = form.querySelector("#btn-decrease");
+          const incrementButton = form.querySelector("#btn-increase");
+          const quantityInput = form.querySelector("#quantity-input");
+  
+          decrementButton.addEventListener("click", function () {
+              let step = parseFloat(quantityInput.step);
+              let min = parseFloat(quantityInput.min);
+              let value = parseFloat(quantityInput.value) - step;
+              quantityInput.value = value >= min ? value.toFixed(2) : min;
+          });
+  
+          incrementButton.addEventListener("click", function () {
+              let step = parseFloat(quantityInput.step);
+              let max = parseFloat(quantityInput.max);
+              let value = parseFloat(quantityInput.value) + step;
+              quantityInput.value = value <= max ? value.toFixed(2) : max;
+          });
+      });
+  });
+  </script>
+  
+</main>
+<div class="rounded-t-xl w-full fixed bottom-0 border-2 bg-white border-principal p-5 shadow-principal">
+  <div class="flex gap-3 justify-between items-center">
+    {% with total_items=cart|length %}
+      <div>
+        {% if total_items > 0 %}
+          <p>{{ total_items }} producto{{ total_items|pluralize }}</p>
+          <p class="text-lg text-principal font-bold">${{ cart.get_total_price | floatformat:2 }}</p>
+        {% elif not order %}
+        <p>Tu pedido esta vacío</p>
+        {% endif %}
+      </div>
+      <div>
+          <a class="mt-auto border border-principal bg-principal rounded-lg py-2 px-4 text-white transition text-center" href="{% url "cart:cart_detail" %}">Finalizar pedido</a>
+
+      </div>
+  </div>
+  {% endwith %}
+  </div>
+</div>
+ {% endblock %}

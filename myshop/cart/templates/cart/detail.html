@@ -1,0 +1,117 @@
+{% extends "shop/base.html" %}
+{% load static %}
+
+{% block title %}
+    Tu pedido
+{% endblock %}
+
+{% block content %}
+    <main class="pt-16 px-4 pb-10 ">
+        <div class="w-full pb-4">
+            <a href="javascript:history.back();">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
+                  </svg>
+                  
+            </a>
+        </div>
+        {% with total_items=cart|length %}
+        {% if total_items > 0 %}
+        <div class="flex flex-col divide-y-2 divide-zinc-300 w-full">
+            {%for item in cart%}
+            {% with product=item.product %}
+            <div class="w-full flex p-3 gap-4 relative">
+                <div>
+                    
+                    <img src="{% if product.image %}{{ product.image.url }}
+                    {% else %}{% static "img/no_image.png" %}{% endif %}" alt="producto1" class="size-25  rounded-2xl object-cover">
+                </div>
+                <div>
+                    <h3 class="text-lg">{{ product.name }}{%if item.prefix == "kg"%}  ({{ item.quantity | floatformat:2 }}<span class="text-xs">kg</span>){%else%}  ({{ item.quantity | floatformat:0 }}){% endif %}</h3>
+                    <form action="{% url 'cart:cart_remove' product.id %}" method="post" class="text-sm text-principal">
+                        {% csrf_token %}
+                        <input type="submit" value="Eliminar">
+                    </form>
+                    <button onclick="openPopup('{{ product.id }}')" class="text-sm text-principal">
+                        Actualizar cantidad
+                    </button>
+                    <div class="absolute bottom-0 right-0 pb-3 text-lg font-medium">${{item.total_price | floatformat:2}}</div>
+
+                        <dialog id="popup-{{ product.id }}" class="m-auto rounded-xl mt-50">
+                            
+                            <div class="rounded-xl p-6 shadow-lg bg-white  ">
+                                <h2 class="text-lg font-bold mb-2">Actualizar cantidad</h2>
+                                <form  class="add-to-cart-form" action="{% url "cart:cart_add" product.id %}" method="post">
+                                    {% csrf_token %}
+                                    <div class="flex items-center justify-center mt-3 gap-4">
+                                        <button type="button" id="btn-decrease" class=" size-10 font-bold rounded-full bg-principal flex items-center justify-center text-2xl text-white">
+                                          <span class="sr-only">Quitar</span>
+                                          -
+                                      </button>
+                                      {{ item.update_quantity_form.quantity }}
+                                        <button type="button" id="btn-increase" class=" size-10 font-bold rounded-full bg-principal flex items-center justify-center text-2xl text-white">
+                                          <span class="sr-only">Agregar</span>
+                                          +
+                                      </button>
+                                    </div>
+                                    {{ item.update_quantity_form.override }}
+                                    <div class="flex justify-end mt-4 gap-2">
+                                        <button type="button" onclick="closePopup('{{ product.id }}')" class="border text-principal border-principal px-4 py-2 rounded-lg">Cancelar</button>
+                                        <button type="submit" class="bg-principal text-white px-4 py-2 rounded-lg">Confirmar</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </dialog>
+                        
+                </div>
+                
+            </div>
+            {% endwith %}
+            {% endfor %}
+        </div>     
+    </main>
+    <div class="rounded-t-xl w-full fixed bottom-0 border-2 bg-white border-principal p-5 shadow-principal">
+        <div class="flex flex-col gap-5 justify-between items-center pb-10 w-full">
+            <div class="w-full flex items-center justify-between font-bold text-xl">
+                <p>Total</p>
+                <p>${{ cart.get_total_price | floatformat:2}}</p>
+            </div>
+            <div class="w-full">
+                <a class="mt-auto w-full text-xl border border-principal bg-principal rounded-lg py-2 px-4 text-white transition text-center block" href="{% url "orders:order_create" %}">
+                    Confirmar pedido
+                </a>
+                <a class="mt-2 w-full text-xl border border-principal bg-white rounded-lg py-2 px-4 text-principal transition text-center block" href="{% url "shop:product_list" %}">
+                    Agregar más productos
+                </a>
+            </div>
+        </div>
+    </div>
+    {% elif not order %}
+    <p>Tu pedido esta vacío</p>
+    {% endif %}
+    {% endwith %}
+    <script  src="{% static "js/updatePopUp.js" %}"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            document.querySelectorAll(".add-to-cart-form").forEach(form => {
+                const decrementButton = form.querySelector("#btn-decrease");
+                const incrementButton = form.querySelector("#btn-increase");
+                const quantityInput = form.querySelector("#quantity-input");
+        
+                decrementButton.addEventListener("click", function () {
+                    let step = parseFloat(quantityInput.step);
+                    let min = parseFloat(quantityInput.min);
+                    let value = parseFloat(quantityInput.value) - step;
+                    quantityInput.value = value >= min ? value.toFixed(2) : min;
+                });
+        
+                incrementButton.addEventListener("click", function () {
+                    let step = parseFloat(quantityInput.step);
+                    let max = parseFloat(quantityInput.max);
+                    let value = parseFloat(quantityInput.value) + step;
+                    quantityInput.value = value <= max ? value.toFixed(2) : max;
+                });
+            });
+        });
+    </script>
+{% endblock %}

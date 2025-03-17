@@ -1,0 +1,376 @@
+{% extends "shop/base.html" %}
+{% block title %}
+ Checkout
+{% endblock %}
+{% block content %}
+<main class="pt-16 px-4 pb-30 ">
+  <div class="w-full pb-8">
+    <a href="javascript:history.back();">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
+          </svg>
+          
+    </a>
+  </div>
+{% with total_items=cart|length %}
+{% if total_items > 0 %}
+<div class="space-y-4">
+  
+<section>
+  <h2 class="text-2xl font-medium">Ingresa tu dirección</h2>
+  <p class="text-sm text-zinc-400 mb-6">Ingresa la dirección a la que enviaremos el pedido</p>
+
+  <form method="post" class="pb-6">
+    {% csrf_token %}
+    <!-- Campos de dirección -->
+    <section class="space-y-2 relative" id="address-section">
+      <div id="address-loader" class="hidden h-full absolute inset-0 bg-white bg-opacity-80 flex items-center justify-center z-10 opacity-75">
+        <div class="w-12 h-12 border-4 border-principal border-t-transparent rounded-full animate-spin"></div>
+      </div>
+      
+      <input type="text" name="street" placeholder="Calle" class="address-field w-full border-2 border-principal placeholder:text-zinc-400 p-2 rounded-lg focus:border-3 text-lg focus:shadow-sm focus:outline-0" required>
+      
+      <input type="text" name="number" placeholder="Número" class="address-field inline w-full border-2 border-principal placeholder:text-zinc-400 p-2 rounded-lg focus:border-3 text-lg focus:shadow-sm focus:outline-0" required>
+      <input type="text" name="zip_code" placeholder="Código Postal" class="address-field inline w-full border-2 border-principal placeholder:text-zinc-400 p-2 rounded-lg focus:border-3 text-lg focus:shadow-sm focus:outline-0" required>
+      
+      <input type="text" name="neighborhood" placeholder="Colonia" class="address-field w-full border-2 border-principal placeholder:text-zinc-400 p-2 rounded-lg focus:border-3 text-lg focus:shadow-sm focus:outline-0" required>
+      <input type="text" name="city" placeholder="Ciudad" class="address-field w-full border-2 border-principal placeholder:text-zinc-400 p-2 rounded-lg focus:border-3 text-lg focus:shadow-sm focus:outline-0" required>
+      <input type="text" name="state" placeholder="Estado" class="address-field w-full border-2 border-principal placeholder:text-zinc-400 p-2 rounded-lg focus:border-3 text-lg focus:shadow-sm focus:outline-0" required>
+      <textarea type="text" name="reference" placeholder="Referencia" class="address-field w-full border-2 border-principal placeholder:text-zinc-400 p-2 rounded-lg focus:border-3 text-lg focus:shadow-sm focus:outline-0"></textarea>
+      <input value="Mexico" type="hidden" name="country" placeholder="País" class="w-full border-2 border-principal placeholder:text-zinc-400 p-2 rounded-lg focus:border-3 text-lg focus:shadow-sm focus:outline-0" required>
+      <button type="button" id="calculate-shipping" disabled class="mt-2 w-full text-xl border border-principal bg-principal rounded-lg py-2 px-4 text-white transition text-center block opacity-50 cursor-not-allowed">Confirmar dirección</button>
+      
+      <input type="hidden" name="shipping_cost" id="shipping_cost_input" value="0">
+    </section>
+
+    <hr class="text-zinc-400 border my-8">
+  
+    <h2 class="text-2xl font-medium">Ingresa tus datos</h2>
+    <p class="text-sm text-zinc-400 mb-6">Ingresa tus datos de contacto para completar el pedido.</p>
+    <!-- Campos del formulario original -->
+    <section class="space-y-2">
+      {% for field in form %}
+          <div >
+              {{ field.errors }}
+              {{ field }}
+          </div>
+      {% endfor %}
+    </section>
+    <div class="rounded-t-xl w-full left-0 fixed bottom-0 border-2 bg-white border-principal p-5 shadow-principal">
+      <div class="space-y-2 pb-5 w-full">
+        <input type="submit" class="mt-auto w-full text-xl border border-principal bg-principal rounded-lg py-2 px-4 text-white transition text-center block"
+         value="Enviar Pedido">
+        
+        <a class="mt-auto w-full text-xl border border-principal bg-white rounded-lg py-2 px-4 text-principal transition text-center block" href="{% url "shop:product_list" %}">
+                              Agregar más productos
+        </a>
+      </div>
+    </div>
+  </form>
+  </section>
+  <hr class="text-zinc-400 border my-8">
+  <section>
+    <p class="text-2xl font-medium">Tu orden</p>
+    <p class="text-sm text-zinc-400 mb-6">Antes de completar tu pedido revisa tu orden</p>
+    <div class="rounded-lg overflow-hidden">
+      <table class="w-full m-top-10 table-auto   p-3 border-collapse border border-principal rounded-lg ">
+        <thead>
+          <tr class="p-4 text-center bg-principal text-white">
+            <th class="p-3 border border-principal">Producto</th>
+            <th class="p-3 border border-principal">Cantidad</th>
+            <th class="p-3 border border-principal">p/u</th>
+            <th class="p-3 border border-principal">Total</th>
+            </tr>
+            </thead>
+            <tbody>
+              {% for item in cart %}
+            <tr>
+              <td class="p-3 border border-principal">{{ item.product.name }}</td>
+              <td class="p-3 border border-principal text-center">{{ item.quantity | floatformat:2 }}</td>
+              <td class="p-3 border border-principal">${{item.price}}</td>
+              <td class="p-3 border border-principal">${{ item.total_price | floatformat:2 }}</td>
+            </tr>
+            {% endfor %}
+            <tr>
+              <td class="p-3 border border-principal text-center">Subotal <br> <span class="text-sm text-zinc-400">(sin envío)</span></td>
+              <td class="p-3 border border-principal text-center" colspan="3">${{ cart.get_total_price | floatformat:2 }}</td>
+            </tr>
+            <tr>
+              <td class="p-3 border border-principal text-center">Envío <br> </td>
+              <td class="p-3 border border-principal text-center" colspan="3">$<span id="shipping-cost">20</span><td>
+            </tr>
+            <tr>
+              <td class="p-3 border border-principal text-center">Total</td>
+              <td class="p-3 border border-principal text-center" colspan="3">$<span id="total-price">{{total}}</span><td>
+            </tr>
+            </tbody>
+        </table>
+      </div>
+      <p class="text-zinc-400 text-sm mt-5 -mb-5 text-right">*El costo del envío se calcula de acuerdo a la dirección de envío</p>
+  
+  </section>
+    <div class="pt-20"></div>
+  </div>
+  <!-- Notificación de envío -->
+  <div id="shipping-notification" class="fixed right-0 top-20 bg-principal text-white p-4 rounded-lg shadow-lg transition-all duration-400 transform translate-x-full opacity-0">
+    <div class="flex items-center">
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+      </svg>
+      <span>Se ha agregado un cargo de envío por $<span id="notification-amount"></span></span>
+    </div>
+  </div>
+  <script>
+    document.forms[0].addEventListener('submit', function(e) {
+      // Si el formulario es válido (la validación HTML5 pasa)
+      if (this.checkValidity()) {
+        // Entonces deshabilita el botón
+        let submitBtn = this.querySelector('input[type="submit"]');
+        submitBtn.disabled = true;
+        submitBtn.value = 'Enviando...';
+      }
+    });
+    
+    // Validar campos de dirección
+    const addressFields = document.querySelectorAll('.address-field');
+    const calculateButton = document.getElementById('calculate-shipping');
+    
+    function checkAddressFields() {
+      let allFilled = true;
+      addressFields.forEach(field => {
+        if (!field.value.trim()) {
+          allFilled = false;
+        }
+      });
+      
+      if (allFilled) {
+        calculateButton.disabled = false;
+        calculateButton.classList.remove('opacity-50', 'cursor-not-allowed');
+      } else {
+        calculateButton.disabled = true;
+        calculateButton.classList.add('opacity-50', 'cursor-not-allowed');
+      }
+    }
+    
+    addressFields.forEach(field => {
+      field.addEventListener('input', checkAddressFields);
+    });
+    
+    // Mostrar notificación
+    function showNotification(amount) {
+      const notification = document.getElementById('shipping-notification');
+      document.getElementById('notification-amount').textContent = amount;
+      
+      // Mostrar la notificación
+      notification.classList.remove('translate-x-full', 'opacity-0');
+      
+      // Ocultar después de 5 segundos
+      setTimeout(() => {
+        notification.classList.add('translate-x-full', 'opacity-0');
+      }, 5000);
+    }
+    
+    // Calcular envío con animación
+    document.getElementById("calculate-shipping").addEventListener("click", function() {
+        const loader = document.getElementById('address-loader');
+        loader.classList.remove('hidden');
+        
+        let formData = new FormData(document.forms[0]);
+        
+        fetch("{% url 'orders:calculate_shipping_cost' %}", {
+            method: "POST",
+            body: formData,
+            headers: {
+                "X-CSRFToken": "{{ csrf_token }}"
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            // Ocultar loader
+            loader.classList.add('hidden');
+            
+            if (data.shipping_cost) {
+                const shippingCost = data.shipping_cost;
+                document.getElementById("shipping-cost").innerText = shippingCost;
+                document.getElementById("shipping_cost_input").value = shippingCost;
+                let total = parseFloat("{{ cart.get_total_price }}") + parseFloat(shippingCost);
+                document.getElementById("total-price").innerText = total.toFixed(2);
+                
+                // Mostrar notificación
+                showNotification(shippingCost);
+            } else {
+                alert("Error al calcular el costo de envío");
+            }
+        })
+        .catch(error => {
+            loader.classList.add('hidden');
+            alert("Error al comunicarse con el servidor");
+        });
+    });
+  </script>
+  <script>
+// Agregar una bandera para controlar si la dirección ha sido validada
+let addressConfirmed = false;
+
+// Referencia al botón de enviar formulario
+const submitButton = document.querySelector('input[type="submit"]');
+
+// Crear un contenedor para el mensaje de error
+const errorMessageContainer = document.createElement('div');
+errorMessageContainer.className = 'text-red-500 text-sm mt-2 text-center hidden';
+errorMessageContainer.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 inline mr-1"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" /></svg> Por favor confirma tu dirección antes de enviar el pedido';
+
+// Crear un botón de envío visual que siempre esté habilitado (para interceptar clics)
+const visualSubmitButton = document.createElement('button');
+visualSubmitButton.type = 'button';
+visualSubmitButton.className = submitButton.className;
+visualSubmitButton.innerText = 'Enviar Pedido';
+
+// Contenedor para el botón visual y el mensaje de error
+const buttonContainer = document.createElement('div');
+buttonContainer.className = 'relative';
+buttonContainer.appendChild(visualSubmitButton);
+buttonContainer.appendChild(errorMessageContainer);
+
+// Insertar el contenedor en lugar del botón original y ocultar el botón original
+submitButton.parentNode.insertBefore(buttonContainer, submitButton);
+submitButton.style.display = 'none';
+
+// Modificar el evento de clic en "Confirmar dirección"
+document.getElementById("calculate-shipping").addEventListener("click", function() {
+    const loader = document.getElementById('address-loader');
+    loader.classList.remove('hidden');
+    
+    let formData = new FormData(document.forms[0]);
+    
+    fetch("{% url 'orders:calculate_shipping_cost' %}", {
+        method: "POST",
+        body: formData,
+        headers: {
+            "X-CSRFToken": "{{ csrf_token }}"
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        // Ocultar loader
+        loader.classList.add('hidden');
+        
+        if (data.shipping_cost) {
+            const shippingCost = data.shipping_cost;
+            document.getElementById("shipping-cost").innerText = shippingCost;
+            document.getElementById("shipping_cost_input").value = shippingCost;
+            let total = parseFloat("{{ cart.get_total_price }}") + parseFloat(shippingCost);
+            document.getElementById("total-price").innerText = total.toFixed(2);
+            
+            // Mostrar notificación
+            showNotification(shippingCost);
+            
+            // Marcar la dirección como confirmada
+            addressConfirmed = true;
+            
+            // Actualizar el campo oculto
+            document.getElementById('address_confirmed').value = 'true';
+            
+            // Actualizar el estado del botón de envío
+            updateSubmitButtonState();
+            
+            // Ocultar mensaje de error
+            errorMessageContainer.classList.add('hidden');
+        } else {
+            alert("Error al calcular el costo de envío");
+        }
+    })
+    .catch(error => {
+        loader.classList.add('hidden');
+        alert("Error al comunicarse con el servidor");
+    });
+});
+
+// Agregar detectores de eventos para los campos de dirección
+addressFields.forEach(field => {
+    field.addEventListener('input', function() {
+        // Si el usuario cambia cualquier campo después de confirmar, requerirá confirmar de nuevo
+        if (addressConfirmed) {
+            addressConfirmed = false;
+            document.getElementById('address_confirmed').value = 'false';
+            updateSubmitButtonState();
+        }
+        checkAddressFields();
+    });
+});
+
+// Función para actualizar el estado del botón de envío
+function updateSubmitButtonState() {
+    if (addressConfirmed) {
+        visualSubmitButton.classList.remove('opacity-50', 'cursor-not-allowed');
+        visualSubmitButton.classList.add('bg-principal', 'hover:bg-principal/90');
+    } else {
+        visualSubmitButton.classList.add('opacity-50', 'cursor-not-allowed');
+        visualSubmitButton.classList.remove('hover:bg-principal/90');
+    }
+}
+
+// Inicializar el estado del botón de envío
+updateSubmitButtonState();
+
+// Agregar evento de clic al botón visual
+visualSubmitButton.addEventListener('click', function() {
+    if (addressConfirmed) {
+        // Si la dirección está confirmada, simular un clic en el botón original
+        submitButton.click();
+        
+        // Actualizar el estado del botón
+        visualSubmitButton.disabled = true;
+        visualSubmitButton.innerText = 'Enviando...';
+        visualSubmitButton.classList.add('opacity-50', 'cursor-not-allowed');
+    } else {
+        // Si la dirección no está confirmada, mostrar el mensaje de error
+        errorMessageContainer.classList.remove('hidden');
+        
+        // Hacer scroll hasta el botón "Confirmar dirección"
+        document.getElementById('calculate-shipping').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        
+        // Hacer parpadear el botón de confirmar dirección
+        const confirmButton = document.getElementById('calculate-shipping');
+        confirmButton.classList.add('animate-pulse', 'border-2', 'border-red-500');
+        
+        setTimeout(() => {
+            confirmButton.classList.remove('animate-pulse', 'border-2', 'border-red-500');
+        }, 2000);
+    }
+});
+
+// Modificar la validación del formulario original
+document.forms[0].addEventListener('submit', function(e) {
+    if (!addressConfirmed) {
+        e.preventDefault();
+        return false;
+    }
+    
+    // Si el formulario es válido (pasa la validación HTML5 y la dirección está confirmada)
+    if (this.checkValidity()) {
+        // Entonces deshabilita el botón
+        submitButton.disabled = true;
+        visualSubmitButton.disabled = true;
+        visualSubmitButton.innerText = 'Enviando...';
+        visualSubmitButton.classList.add('opacity-50', 'cursor-not-allowed');
+    }
+});
+
+// Agregar un campo oculto para rastrear si la dirección fue confirmada
+const confirmedInput = document.createElement('input');
+confirmedInput.type = 'hidden';
+confirmedInput.name = 'address_confirmed';
+confirmedInput.id = 'address_confirmed';
+confirmedInput.value = 'false';
+document.forms[0].appendChild(confirmedInput);
+  </script>
+</section>
+</div>
+{% elif not order %}
+    <p>No has generado ninguna orden, da click <a class="text-principal" href="{% url "shop:product_list" %}">aquí</a> para agregar productos</p>
+{% endif %}
+{% endwith %}
+</main>
+ 
+{% endblock %}

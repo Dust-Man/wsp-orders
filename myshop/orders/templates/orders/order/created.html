@@ -1,0 +1,56 @@
+{% extends "shop/base.html" %}
+{% block title %}
+ Gracias
+{% endblock %}
+{% block content %}
+<style>
+    @keyframes draw-circle {
+        from {
+            stroke-dashoffset: 314;
+        }
+        to {
+            stroke-dashoffset: 0;
+        }
+    }
+
+    @keyframes draw-check {
+        from {
+            stroke-dashoffset: 80;
+        }
+        to {
+            stroke-dashoffset: 0;
+        }
+    }
+
+    .animate-circle {
+        stroke-dasharray: 314;
+        stroke-dashoffset: 314;
+        animation: draw-circle .5s ease-out forwards;
+    }
+
+    .animate-check {
+        stroke-dasharray: 80;
+        stroke-dashoffset: 80;
+        animation: draw-check 0.5s ease-out .5s forwards;
+    }
+</style>
+ <main class="pt-16 px-4 pb-30 h-screen ">
+    <div class="flex flex-col items-center justify-center min-h-9/10 ">
+        <div class="relative w-24 h-24 mb-6">
+            <svg viewBox="0 0 100 100" class="w-full h-full">
+                <!-- Círculo -->
+                <circle cx="50" cy="50" r="45" fill="none" stroke="#4CAF50" stroke-width="5" class="animate-circle" />
+                <!-- Palomita -->
+                <polyline points="30,50 45,65 70,35" fill="none" stroke="#4CAF50" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" class="animate-check" />
+            </svg>
+        </div>
+        <div class="text-center space-y-3">
+            <p class="text-2xl font-medium">Tu pedido ha sido enviado exitosamente.</p>
+            <p class="text-2xl font-medium">Tu número de orden es #{{order.id}}.</p>
+            <p class="text text-zinc-400">Estamos procesando tu pedido.</p>
+            <p class="text text-zinc-400">Nos pondremos en contacto contigo a través del número que nos proporcionaste.</p>
+
+        </div>
+    </div>
+</main>
+{% endblock %}
