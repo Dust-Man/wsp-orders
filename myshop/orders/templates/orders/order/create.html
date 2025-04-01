@@ -122,14 +122,28 @@
   </div>
   <script>
     document.forms[0].addEventListener('submit', function(e) {
-      // Si el formulario es válido (la validación HTML5 pasa)
+  // Store reference to the submit button
+      let submitBtn = this.querySelector('input[type="submit"]');
+      
+      // Check if the form is valid
       if (this.checkValidity()) {
-        // Entonces deshabilita el botón
-        let submitBtn = this.querySelector('input[type="submit"]');
+        // If valid, disable the button
         submitBtn.disabled = true;
         submitBtn.value = 'Enviando...';
+      } else {
+        // If not valid, ensure the button is enabled
+        // This is crucial for cases where the button was previously disabled
+        submitBtn.disabled = false;
+        submitBtn.value = 'Enviar Pedido';
+        
+        // The browser will handle showing validation errors
       }
     });
+    document.forms[0].addEventListener('input', function() {
+  let submitBtn = this.querySelector('input[type="submit"]');
+  submitBtn.disabled = false;
+  submitBtn.value = 'Enviar Pedido';
+});
     
     // Validar campos de dirección
     const addressFields = document.querySelectorAll('.address-field');
@@ -208,7 +222,7 @@
         });
     });
   </script>
-  <script>
+  <script >
 // Agregar una bandera para controlar si la dirección ha sido validada
 let addressConfirmed = false;
 
@@ -217,7 +231,7 @@ const submitButton = document.querySelector('input[type="submit"]');
 
 // Crear un contenedor para el mensaje de error
 const errorMessageContainer = document.createElement('div');
-errorMessageContainer.className = 'text-red-500 text-sm mt-2 text-center hidden';
+errorMessageContainer.className = 'text-blue-400 text-sm mt-2 text-center hidden';
 errorMessageContainer.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4 inline mr-1"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z" /></svg> Por favor confirma tu dirección antes de enviar el pedido';
 
 // Crear un botón de envío visual que siempre esté habilitado (para interceptar clics)
@@ -314,33 +328,88 @@ function updateSubmitButtonState() {
 updateSubmitButtonState();
 
 // Agregar evento de clic al botón visual
-visualSubmitButton.addEventListener('click', function() {
-    if (addressConfirmed) {
-        // Si la dirección está confirmada, simular un clic en el botón original
-        submitButton.click();
+// Agregar esta función para restaurar el botón
+// Agregar esta función para restaurar el botón
+function resetSubmitButton() {
+    submitButton.disabled = false;
+    visualSubmitButton.disabled = false;
+    visualSubmitButton.innerText = 'Enviar Pedido';
+    visualSubmitButton.classList.remove('opacity-50', 'cursor-not-allowed');
+    
+    // Mantener la apariencia correcta según addressConfirmed
+    updateSubmitButtonState();
+}
+
+// Variable para rastrear si se produjo un error de validación
+let validationFailed = false;
+
+// Agregar listeners para el evento 'invalid' en todos los campos requeridos
+const requiredFields = document.querySelectorAll('input[required], select[required], textarea[required]');
+requiredFields.forEach(field => {
+    field.addEventListener('invalid', function(e) {
+        // Marcar que la validación falló
+        validationFailed = true;
         
-        // Actualizar el estado del botón
+        // Restaurar el botón inmediatamente
+        resetSubmitButton();
+    });
+});
+
+// Modificar el evento submit del formulario
+document.forms[0].addEventListener('submit', function(e) {
+    // Resetear la bandera de validación al inicio de cada intento
+    validationFailed = false;
+    
+    if (!addressConfirmed) {
+        e.preventDefault();
+        return false;
+    }
+    
+    // Si el formulario es válido y la dirección está confirmada
+    if (this.checkValidity()) {
+        // Deshabilitar el botón
+        submitButton.disabled = true;
         visualSubmitButton.disabled = true;
         visualSubmitButton.innerText = 'Enviando...';
         visualSubmitButton.classList.add('opacity-50', 'cursor-not-allowed');
     } else {
-        // Si la dirección no está confirmada, mostrar el mensaje de error
+        // Si detectamos que no es válido en este punto, prevenimos el envío
+        e.preventDefault();
+        
+        // La bandera validationFailed se activará por los eventos 'invalid'
+        // y resetSubmitButton() se llamará desde ahí
+    }
+    
+    // Si después de intentar validar no hubo errores, el formulario se envía
+    // Si hubo errores de validación, ya habremos restaurado el botón
+});
+
+// Modificar el evento de clic en el botón visual
+visualSubmitButton.addEventListener('click', function() {
+    if (addressConfirmed) {
+        // Si la dirección está confirmada, actualizar apariencia del botón
+        visualSubmitButton.disabled = true;
+        visualSubmitButton.innerText = 'Enviando...';
+        visualSubmitButton.classList.add('opacity-50', 'cursor-not-allowed');
+        
+        // Simular un clic en el botón original
+        submitButton.click();
+        
+        // La validación del formulario ocurrirá en el evento submit
+        // Si falla, los eventos 'invalid' restaurarán el botón
+    } else {
+        // Código existente para cuando la dirección no está confirmada
         errorMessageContainer.classList.remove('hidden');
-        
-        // Hacer scroll hasta el botón "Confirmar dirección"
         document.getElementById('calculate-shipping').scrollIntoView({ behavior: 'smooth', block: 'center' });
-        
-        // Hacer parpadear el botón de confirmar dirección
         const confirmButton = document.getElementById('calculate-shipping');
         confirmButton.classList.add('animate-pulse', 'border-2', 'border-red-500');
-        
         setTimeout(() => {
             confirmButton.classList.remove('animate-pulse', 'border-2', 'border-red-500');
         }, 2000);
     }
 });
-
 // Modificar la validación del formulario original
+// Modify the form submit event listener in your second script
 document.forms[0].addEventListener('submit', function(e) {
     if (!addressConfirmed) {
         e.preventDefault();
@@ -354,6 +423,33 @@ document.forms[0].addEventListener('submit', function(e) {
         visualSubmitButton.disabled = true;
         visualSubmitButton.innerText = 'Enviando...';
         visualSubmitButton.classList.add('opacity-50', 'cursor-not-allowed');
+    } else {
+        // Si la validación HTML5 falla, re-habilita los botones
+        submitButton.disabled = false;
+        visualSubmitButton.disabled = false;
+        visualSubmitButton.innerText = 'Enviar Pedido';
+        visualSubmitButton.classList.remove('opacity-50', 'cursor-not-allowed');
+        
+        // Asegúrate de que el botón visual tenga el estilo correcto basado en addressConfirmed
+        updateSubmitButtonState();
+    }
+});
+
+// Add this event listener to re-enable the visual button when a user interacts with any field
+document.forms[0].addEventListener('input', function() {
+    // No cambiamos el estado de addressConfirmed aquí, solo nos aseguramos
+    // que el botón visual refleje correctamente ese estado
+    
+    // Re-habilita el botón real (aunque siga oculto)
+    submitButton.disabled = false;
+    
+    // Actualiza el estado visual del botón falso según addressConfirmed
+    updateSubmitButtonState();
+    
+    // Si el botón estaba en estado "Enviando...", restaurarlo
+    if (visualSubmitButton.innerText === 'Enviando...') {
+        visualSubmitButton.innerText = 'Enviar Pedido';
+        visualSubmitButton.disabled = false;
     }
 });
 

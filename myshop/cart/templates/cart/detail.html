@@ -17,7 +17,7 @@
         </div>
         {% with total_items=cart|length %}
         {% if total_items > 0 %}
-        <div class="flex flex-col divide-y-2 divide-zinc-300 w-full">
+        <div class="flex flex-col divide-y-2 divide-zinc-300 w-full pb-60">
             {%for item in cart%}
             {% with product=item.product %}
             <div class="w-full flex p-3 gap-4 relative">
@@ -27,7 +27,7 @@
                     {% else %}{% static "img/no_image.png" %}{% endif %}" alt="producto1" class="size-25  rounded-2xl object-cover">
                 </div>
                 <div>
-                    <h3 class="text-lg">{{ product.name }}{%if item.prefix == "kg"%}  ({{ item.quantity | floatformat:2 }}<span class="text-xs">kg</span>){%else%}  ({{ item.quantity | floatformat:0 }}){% endif %}</h3>
+                    <h3 class="text-lg ">{{ product.name }}{%if item.prefix == "kg"%}  ({{ item.quantity | floatformat:2 }}<span class="text-xs">kg</span>){%else%}  ({{ item.quantity | floatformat:0 }}){% endif %}</h3>
                     <form action="{% url 'cart:cart_remove' product.id %}" method="post" class="text-sm text-principal">
                         {% csrf_token %}
                         <input type="submit" value="Eliminar">

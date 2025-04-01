@@ -113,6 +113,13 @@ def order_create(request):
                 cart.clear()
                 return render(request, 'orders/order/created.html', {'order': order})
             else:
+                order.sent = False
+                order.save()
+                for item in cart:
+                    OrderItem.objects.create(order=order,
+                                             product=item['product'],
+                                             price=item['price'],
+                                             quantity=item['quantity'])
                 return render(request, 'orders/order/fail.html')
 
     else:

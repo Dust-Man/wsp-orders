@@ -52,4 +52,22 @@ class Product(models.Model):
     def get_absolute_url(self):
         return reverse('shop:product_detail',
                        args=[self.id, self.slug])
-# Create your models here.
+class StoreStatus(models.Model):
+    """Modelo para gestionar el estado de apertura/cierre de la tienda."""
+    is_open = models.BooleanField(default=True, verbose_name="Tienda abierta")
+    closed_reason = models.CharField(max_length=255, blank=True, null=True, verbose_name="Motivo de cierre")
+    manual_override = models.BooleanField(default=False, verbose_name="Cierre manual")
+    last_updated = models.DateTimeField(auto_now=True, verbose_name="Última actualización")
+    
+    class Meta:
+        verbose_name = "Estado de la tienda"
+        verbose_name_plural = "Estado de la tienda"
+    
+    def __str__(self):
+        return "Abierta" if self.is_open else "Cerrada"
+        
+    @classmethod
+    def get_status(cls):
+        """Obtiene o crea el único registro de estado de la tienda."""
+        status, created = cls.objects.get_or_create(pk=1)
+        return status

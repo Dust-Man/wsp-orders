@@ -13,7 +13,7 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-BASE_DIR = Path(__file__).resolve().parent.parent
+BASE_DIR = Path(__file__).resolve().parent.parent.parent
 
 
 # Quick-start development settings - unsuitable for production
@@ -23,7 +23,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-du@+pzzk@s55144d=g2w7s7rjv#mqclvh*2_o3fa-#(7)b)q1i'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+
 
 ALLOWED_HOSTS = []
 
@@ -40,6 +40,8 @@ INSTALLED_APPS = [
     'shop.apps.ShopConfig',
     'cart.apps.CartConfig',
     'orders.apps.OrdersConfig',
+    'admin_dashboard', 
+    'django.contrib.postgres',
 ]
 
 MIDDLEWARE = [
@@ -66,24 +68,13 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'cart.context_processors.cart',
+                'shop.context_processors.store_hours'
             ],
         },
     },
 ]
 
 WSGI_APPLICATION = 'myshop.wsgi.application'
-
-
-# Database
-# https://docs.djangoproject.com/en/4.1/ref/settings/#databases
-
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
-}
-
 
 # Password validation
 # https://docs.djangoproject.com/en/4.1/ref/settings/#auth-password-validators
@@ -107,9 +98,13 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/4.1/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+TIME_ZONE = 'America/Mexico_City'  # Zona horaria para Ciudad de México y centro del país
 
-TIME_ZONE = 'UTC'
+# Asegúrate de que esta configuración esté activada para usar la zona horaria
+USE_TZ = True
+
+# La configuración de idioma también puede ser útil para mostrar fechas en español
+LANGUAGE_CODE = 'es-mx'
 
 USE_I18N = True
 
@@ -129,6 +124,6 @@ MEDIA_ROOT = BASE_DIR / 'media'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 CART_SESSION_ID = 'cart'
 
-WHATSAPP_API_TOKEN = 'EAAyXPVtjbxYBOz7mMycu2206YMlDVYkZCAwrqQvh9uc1trlMiKJl9hIG1nZAklrKIcUGZCIpTowYZAva1Pph3lSsa4A93imCxWs4MJKLZCz2qkgfZAnyzHYaHS5OA3eWJw6YDLE4jMYYZA80DCM0L0yaarjCsqNaB3M0sIZBJZApW7AOdZCCSV1COKUNRxzFVh3X3P9z5oJJlUevYQgZBoQje80ZARtmwpZBWuZABfRBhRPnQ4ZBVIZD'
+WHATSAPP_API_TOKEN = 'EAAyXPVtjbxYBO8knZBzjRIwQOkmgVy9fih4wi0DyXcp3ebgv5rBCaylPRrSbWq9ZBp2sxGdK1pv0BvBmA5gj1A8H5IxE3xnUXpMoQS9hjZAcZCVD4d2J93kPC9QPp8e5lT8V2CxoS24EYHOyIwZBdZCHNe0FBiGBh4gMvOkGuc8CZAEPHbPmDfMXD44idzSMOmRxlGMz8c4J03B6jmfNF2a6HF0pPqUB0ZAnidWEZBZAGMWFAZd'
 
 GOOGLE_MAPS_API_KEY = 'AIzaSyBcpB2IOEAeJhjxvtfyRpssd0KgHZ672oY'

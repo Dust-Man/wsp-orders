@@ -12,6 +12,9 @@
 </head>
   
  <body>
+
+  
+
   
   <header class="fixed w-full z-50">
     <nav class=" shadow flex justify-around  w-full bg-principal text-white  lg:pr-4 lg:justify-start items-center">
@@ -25,7 +28,8 @@
         </a>
 
         <a class="lg:w-2/5 flex items-center" href="/">
-            <p class="h-12 align-middle p-2 flex items-center font-bold tracking-widest text-2xl">WSP ORDERS</p>
+            <!-- <p class="h-12 align-middle p-2 flex items-center font-bold tracking-widest text-2xl">WSP ORDERS</p> -->
+            <img src="{% static "img/logo.png" %}" alt="Carnicería Pablito" class="h-13 p-2  align-middle ">
         </a>
 
 
@@ -52,10 +56,30 @@
 
     </nav>
 </header>
-  <body>
-   <div id="content" class="">
-     {% block content %}
-     {% endblock %}
-   </div>
+
+    {% if not store_open  %}
+      <div class="fixed inset-0 bg-black bg-opacity-70 z-50 flex items-center justify-center">
+        <div class="bg-white p-8 shadow-xl h-full w-full text-center flex flex-col justify-center items-center gap-30">
+            <div class="max-w-sm">
+              <img src="{% static "img/logo.png" %}" alt="Carnicería Pablito" class="aspect-375/208 p-2  align-middle ">
+            </div>
+            <div>
+              <h2 class="text-2xl font-bold text-gray-800 mb-2">Tienda Cerrada</h2>
+              <p class="text-gray-600 mb-6">{{ closed_reason }}</p>
+              
+              {% if not manual_override %}
+              <div class="border-t border-gray-200 pt-4">
+                <h3 class="font-semibold text-gray-700 mb-2">Horarios de Atención:</h3>
+                <p class="text-gray-600">Lunes a Sábado: 8:00 AM - 5:00 PM</p>
+                <p class="text-gray-600">Domingos: 8:00 AM - 4:00 PM</p>
+              </div>
+              {% endif %}
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    <div id="content" class="{% if not store_open and request.path != '/dashboard/'  %}pointer-events-none opacity-20{% endif %}">
+      {% block content %}{% endblock %}
+    </div>
  </body>
 </html>
