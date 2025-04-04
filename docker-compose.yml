@@ -1,29 +1,48 @@
 services:
   db:
-    platform: linux/amd64
-    image: postgres:14.5
+    image: postgres
     restart: always
     volumes:
-    - ./data/db:/var/lib/postgresql/data
+      - ./data/db:/var/lib/postgresql/data
     environment:
-    - POSTGRES_DB=postgres
-    - POSTGRES_USER=postgres
-    - POSTGRES_PASSWORD=postgres
-
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+  
   web:
     build: .
-    command: ["./wait-for-it.sh", "db:5432", "--",
-            "python", "/code/myshop/manage.py", "runserver",
-            "0.0.0.0:8000"]
+    command: ["./entrypoint.sh"]
     restart: always
     volumes:
       - .:/code
-    ports:
-      - "8000:8000"
+      - static_volume:/code/staticfiles
+      - media_volume:/code/myshop/media
     environment:
       - DJANGO_SETTINGS_MODULE=myshop.settings.prod
       - POSTGRES_DB=postgres
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
+      - SECRET_KEY=your_secret_key_here
+      - WHATSAPP_API_TOKEN=your_whatsapp_token_here
+      - GOOGLE_MAPS_API_KEY=your_google_maps_key_here
     depends_on:
       - db
+    expose:
+      - 8000
+  
+  nginx:
+    image: nginx:1.25
+    restart: always
+    volumes:
+      - ./nginx/conf.d:/etc/nginx/conf.d
+      - static_volume:/code/staticfiles
+      - media_volume:/code/myshop/media
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - web
+
+volumes:
+  static_volume:
+  media_volume:

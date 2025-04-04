@@ -1,0 +1,106 @@
+Directory structure:
+└── dust-man-wsp-orders/
+    ├── docker-compose.yml
+    ├── Dockerfile
+    ├── requirements.txt
+    ├── wait-for-it.sh
+    └── myshop/
+        ├── db.sqlite3
+        ├── manage.py
+        ├── admin_dashboard/
+        │   ├── __init__.py
+        │   ├── admin.py
+        │   ├── apps.py
+        │   ├── models.py
+        │   ├── tests.py
+        │   ├── urls.py
+        │   ├── views.py
+        │   ├── __pycache__/
+        │   ├── migrations/
+        │   │   ├── __init__.py
+        │   │   └── __pycache__/
+        │   └── templates/
+        │       └── admin_dashboard/
+        │           ├── base.html
+        │           ├── dashboard.html
+        │           └── login.html
+        ├── cart/
+        │   ├── __init__.py
+        │   ├── admin.py
+        │   ├── apps.py
+        │   ├── cart.py
+        │   ├── context_processors.py
+        │   ├── forms.py
+        │   ├── models.py
+        │   ├── tests.py
+        │   ├── urls.py
+        │   ├── views.py
+        │   ├── __pycache__/
+        │   ├── migrations/
+        │   └── templates/
+        │       └── cart/
+        │           └── detail.html
+        ├── media/
+        |
+        ├── myshop/
+        │   ├── __init__.py
+        │   ├── asgi.py
+        │   ├── urls.py
+        │   ├── wsgi.py
+        │   ├── __pycache__/
+        │   └── settings/
+        │       ├── base.py
+        │       ├── local.py
+        │       ├── prod.py
+        │       └── __pycache__/
+        ├── orders/
+        │   ├── __init__.py
+        │   ├── admin.py
+        │   ├── apps.py
+        │   ├── brisa.py
+        │   ├── forms.py
+        │   ├── models.py
+        │   ├── shipping.py
+        │   ├── tests.py
+        │   ├── urls.py
+        │   ├── views.py
+        │   ├── __pycache__/
+        │   ├── migrations/
+        |   |
+        │   └── templates/
+        │       └── orders/
+        │           └── order/
+        │               ├── create.html
+        │               ├── created.html
+        │               └── fail.html
+        └── shop/
+            ├── __init__.py
+            ├── admin.py
+            ├── apps.py
+            ├── context_processors.py
+            ├── models.py
+            ├── tests.py
+            ├── urls.py
+            ├── views.py
+            ├── __pycache__/
+            ├── migrations/
+            │  
+            ├── static/
+            │   ├── css/
+            │   │   ├── base.css
+            │   │   └── input.css
+            │   ├── img/
+            │   └── js/
+            │       ├── category_toggle.js
+            │       └── updatePopUp.js
+            ├── templates/
+            │   └── shop/
+            │       ├── base.html
+            │       ├── waca.html
+            │       └── product/
+            │           ├── detail.html
+            │           └── list.html
+            └── templatetags/
+                ├── __init__.py
+                ├── custom_filters.py
+                └── __pycache__/
